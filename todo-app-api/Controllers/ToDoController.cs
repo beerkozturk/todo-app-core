@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using todo_app_api.Models.Entities;
+using CRUD_APP.Models;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace todo_app_api.Controllers
 {
@@ -14,21 +14,41 @@ namespace todo_app_api.Controllers
     [Route("[controller]")]
     public class ToDoController : Controller
     {
-        List<ToDo> TodoList = new List<ToDo> {
-                new ToDo {Id=1,Description="Yazılım alanında gelişimimi sağlamak için görev",Title="Günde 2 saat React bak",IsComplated=false},
-                 new ToDo {Id=2,Description="Yazılım alanında gelişimi gördüm",Title="Günde 2 saat JS bak",IsComplated=false},
 
+        private readonly ToDoDbContext _context;
 
-
-                };
-
-        [HttpGet(Name = "GetToDos")]
-
-
-        public List<ToDo> Index()
+        public ToDoController(ToDoDbContext context)
         {
-            return TodoList;
+            _context = context;
         }
+
+        [HttpGet(Name = "GetTasks")]
+        public List<ToDo> GetTasks()
+        {
+            // Retrieve all tasks from the database
+            var tasks = _context.Tasks.ToList();
+            return tasks;
+        }
+
+        [HttpPost]
+        public IActionResult AddToDoItem([FromBody] ToDo newToDo)
+        {
+            if (ModelState.IsValid)
+            {
+                // Add the new ToDo item to the database
+                _context.Tasks.Add(newToDo);
+                _context.SaveChanges();
+
+                // Return the updated list of tasks
+                var tasks = _context.Tasks.ToList();
+                return Ok(tasks);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
     }
 }
 

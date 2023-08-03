@@ -22,7 +22,7 @@ namespace todo_app_api.Controllers
             _context = context;
         }
 
-        [HttpGet(Name = "GetTasks")]
+        [HttpGet("GetTasks" )]
         public List<ToDo> GetTasks()
         {
             // Retrieve all tasks from the database
@@ -30,8 +30,8 @@ namespace todo_app_api.Controllers
             return tasks;
         }
 
-        [HttpPost]
-        public IActionResult AddToDoItem([FromBody] ToDo newToDo)
+       [HttpPost("AddToDo")]
+        public IActionResult AddToDoItem(ToDo newToDo)
         {
             if (ModelState.IsValid)
             {
@@ -48,7 +48,30 @@ namespace todo_app_api.Controllers
                 return BadRequest(ModelState);
             }
         }
+       
+        [HttpGet("DeleteToDo")]
+        public IActionResult DeleteToDo(int todoid)
+        {
+            if (ModelState.IsValid)
+            {
+                // Add the new ToDo item to the database
+                var taskToDelete = _context.Tasks.FirstOrDefault(t => t.Id == todoid);
+                if (taskToDelete != null)
+                {
+                    _context.Tasks.Remove(taskToDelete);
+                    _context.SaveChanges();
+                }
 
+                // Return the updated list of tasks
+                var tasks = _context.Tasks.ToList();
+                return Ok(tasks);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+    
     }
 }
 
